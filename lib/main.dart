@@ -52,7 +52,10 @@ class ProductListScreen extends StatelessWidget {
           } 
           else if (snapshot.hasError) {
             return Center(
-                child: Center(child: Text('Error: ${snapshot.error}')));
+                child: Padding(
+                  padding: const EdgeInsets.all(30.0),
+                  child: Text('Error : ${snapshot.error}'),
+                ));
           } 
           else if (snapshot.hasData) {
             final products = snapshot.data!;
@@ -183,7 +186,7 @@ class TotalCostSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final totalCost = Provider.of<CartModel>(context).totalCost;
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(20),
       child: Text(
         'Total: \$${totalCost.toStringAsFixed(2)}',
         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
