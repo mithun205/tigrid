@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tigrid/api_serivice.dart';
-import 'cart_model.dart';
+import 'package:tigrid/cart_model.dart';
 import 'product_model.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -13,8 +14,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => CartModel(),
+    return BlocProvider(
+      create: (context) => CartCubit(),
       child: MaterialApp(
         home: ProductListScreen(),
         debugShowCheckedModeBanner: false,
@@ -23,9 +24,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-//homepage
 class ProductListScreen extends StatelessWidget {
-
   final ApiService apiService = ApiService();
 
   ProductListScreen({super.key});
@@ -49,15 +48,13 @@ class ProductListScreen extends StatelessWidget {
                 child: CircularProgressIndicator(
               color: Colors.black,
             ));
-          } 
-          else if (snapshot.hasError) {
+          } else if (snapshot.hasError) {
             return Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(30.0),
-                  child: Text('Error : ${snapshot.error}'),
-                ));
-          } 
-          else if (snapshot.hasData) {
+              padding: const EdgeInsets.all(30.0),
+              child: Text('Error : ${snapshot.error}'),
+            ));
+          } else if (snapshot.hasData) {
             final products = snapshot.data!;
             return Column(
               children: [
@@ -81,9 +78,7 @@ class ProductListScreen extends StatelessWidget {
   }
 }
 
-//product list...
 class ProductItem extends StatefulWidget {
-
   final Product product;
 
   const ProductItem({super.key, required this.product});
@@ -91,8 +86,8 @@ class ProductItem extends StatefulWidget {
   @override
   _ProductItemState createState() => _ProductItemState();
 }
-class _ProductItemState extends State<ProductItem> {
 
+class _ProductItemState extends State<ProductItem> {
   int _quantity = 0;
 
   @override
@@ -107,7 +102,6 @@ class _ProductItemState extends State<ProductItem> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Product Image
             Image.network(
               widget.product.thumbnail,
               width: 60,
@@ -115,8 +109,6 @@ class _ProductItemState extends State<ProductItem> {
               fit: BoxFit.cover,
             ),
             const SizedBox(width: 10),
-
-            // Product Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,8 +132,6 @@ class _ProductItemState extends State<ProductItem> {
                 ],
               ),
             ),
-
-            // Product Price and Quantity Selector
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -149,9 +139,7 @@ class _ProductItemState extends State<ProductItem> {
                   '\$${widget.product.price.toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 15),
                 ),
-
                 const SizedBox(height: 5),
-
                 DropdownButton<int>(
                   dropdownColor: Colors.yellow[200],
                   value: _quantity,
@@ -165,8 +153,7 @@ class _ProductItemState extends State<ProductItem> {
                     setState(() {
                       _quantity = value!;
                     });
-                    Provider.of<CartModel>(context, listen: false)
-                        .addToCart(widget.product, _quantity);
+                    context.read<CartCubit>().addToCart(widget.product, _quantity);
                   },
                 ),
               ],
@@ -178,13 +165,12 @@ class _ProductItemState extends State<ProductItem> {
   }
 }
 
-//total amount..
 class TotalCostSection extends StatelessWidget {
   const TotalCostSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final totalCost = Provider.of<CartModel>(context).totalCost;
+    final totalCost = context.select<CartCubit, double>((cubit) => cubit.totalCost);
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Text(
