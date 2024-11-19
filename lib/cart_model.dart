@@ -1,20 +1,22 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'product_model.dart';
 
-class CartModel extends ChangeNotifier {
-  List<Map<String, dynamic>> _cart = [];
+class CartCubit extends Cubit<List> {
+  CartCubit() : super([]);
 
-  List<Map<String, dynamic>> get cart => _cart;
-
+  // Add product to the cart
   void addToCart(Product product, int quantity) {
     if (quantity > 0) {
-      _cart.add({'product': product, 'quantity': quantity});
-      notifyListeners();
+      final updatedCart = List<Map<String, dynamic>>.from(state);
+      updatedCart.add({'product': product, 'quantity': quantity});
+      emit(updatedCart);
     }
   }
 
+  
+  // Calculate the total cost
   double get totalCost {
-    return _cart.fold(0, (sum, item) {
+    return state.fold(0, (sum, item) {
       return sum + (item['product'].price * item['quantity']);
     });
   }
